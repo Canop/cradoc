@@ -3,8 +3,8 @@ use {
     lazy_regex::*,
     rustdoc_types::{
         Crate,
-        ItemEnum,
         Id,
+        ItemEnum,
     },
     std::{
         fs::{
@@ -24,6 +24,8 @@ use {
     },
 };
 
+/// Holds all the context information about a crate needed to generate
+/// or update other documents
 pub struct Context {
     pub crate_name: String,
     pub crate_file_name: String,
@@ -35,9 +37,8 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn load(
-        crate_path: &Path,
-    ) -> CradResult<Self> {
+    /// Load the context from the crate at the given path (path to the crate root)
+    pub fn load(crate_path: &Path) -> CradResult<Self> {
         let crate_path = fs::canonicalize(crate_path)?;
         let crate_name = crate_path
             .file_name()
@@ -46,7 +47,8 @@ impl Context {
         let crate_file_name = crate_name.replace("-", "_");
         let rd_crate = build_and_read_json_doc(&crate_path, &crate_file_name)?;
         let crate_item_id = find_crate_item(&rd_crate)?;
-        let online_doc_base_url = format!("https://docs.rs/{}/latest/{}/", crate_name, crate_file_name);
+        let online_doc_base_url =
+            format!("https://docs.rs/{}/latest/{}/", crate_name, crate_file_name);
         let html_doc_dir = build_html_doc(&crate_path)?;
         Ok(Self {
             crate_name: crate_name.to_string(),
@@ -58,23 +60,23 @@ impl Context {
             online_doc_base_url,
         })
     }
-    pub fn crate_doc_md(
-        &self,
-    ) -> CradResult<String> {
-        let item = self.rd_crate.index.get(&self.crate_item_id)
+    pub fn crate_doc_md(&self) -> CradResult<String> {
+        let item = self
+            .rd_crate
+            .index
+            .get(&self.crate_item_id)
             .ok_or(CradError::NoCrateItem)?; // Should not happen, by construct
         let Some(docs) = item.docs.as_ref() else {
             return Err(CradError::NoDocInItem);
         };
-        let crate_html_path = self.html_doc_dir.join(&self.crate_file_name).join("index.html");
+        let crate_html_path = self
+            .html_doc_dir
+            .join(&self.crate_file_name)
+            .join("index.html");
         let links = extract_links(crate_html_path)?;
 
         // remove single line hidden imports (presumably in code snippets)
-        let docs = regex_replace_all!(
-            r"(?m)^# use [^\n]+;$\n",
-            &docs,
-            ""
-        );
+        let docs = regex_replace_all!(r"(?m)^# use [^\n]+;$\n", &docs, "");
 
         // replace code links like [sometype] or [`sometype`] with proper links
         let docs = regex_replace_all!(
@@ -92,9 +94,7 @@ impl Context {
         );
         Ok(docs.to_string())
     }
-    pub fn update_all_md_files(
-        &self,
-    ) -> CradResult<()> {
+    pub fn update_all_md_files(&self) -> CradResult<()> {
         // let's start with only the root file until I decide to manage .gitignore, etc.
         for entry in fs::read_dir(&self.crate_path)? {
             let entry = entry?;
@@ -106,12 +106,12 @@ impl Context {
             let Some(file_name) = file_name.to_str() else {
                 continue; // too weird for us
             };
-            if ! regex_is_match!(r"\.md$"i, file_name) {
+            if !regex_is_match!(r"\.md$"i, file_name) {
                 continue;
             }
             let path = entry.path();
             if self.update_file(&path)? {
-                println!("Updated crate doc in file {:?}", path);
+                eprintln!("Updated crate doc in file {:?}", path);
             }
         }
         Ok(())
@@ -179,9 +179,7 @@ impl Context {
     }
 }
 
-pub fn find_crate_item(
-    rd_crate: &Crate,
-) -> CradResult<Id> {
+pub fn find_crate_item(rd_crate: &Crate) -> CradResult<Id> {
     for item in rd_crate.index.values() {
         let ItemEnum::Module(module) = &item.inner else {
             continue;

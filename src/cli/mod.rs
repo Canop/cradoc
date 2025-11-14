@@ -5,9 +5,7 @@ pub use args::*;
 use {
     crate::*,
     clap::Parser,
-    std::{
-        path::Path,
-    },
+    std::path::Path,
 };
 
 pub fn run() -> CradResult<()> {
@@ -20,7 +18,7 @@ pub fn run() -> CradResult<()> {
     }
 
     if args.version {
-        println!("bacon {}", env!("CARGO_PKG_VERSION"));
+        println!("cradoc {}", env!("CARGO_PKG_VERSION"));
         return Ok(());
     }
 
@@ -32,4 +30,3 @@ pub fn run() -> CradResult<()> {
 
     Ok(())
 }
-

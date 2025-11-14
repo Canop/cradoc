@@ -1,37 +1,31 @@
 use {
     crate::*,
+    rustc_hash::FxHashMap,
     scraper::{
         Html,
         Selector,
     },
-    rustc_hash::FxHashMap,
     std::{
         fs,
-        path::Path,
-        path::PathBuf,
-        process::{
-            Command,
+        path::{
+            Path,
+            PathBuf,
         },
+        process::Command,
     },
 };
 
 /// Build the crate documentation in HTML format and return the path to the
 ///  directory holding all docs (one subdir per crate)
-pub fn build_html_doc(
-    crate_path: &Path,
-) -> CradResult<PathBuf> {
+pub fn build_html_doc(crate_path: &Path) -> CradResult<PathBuf> {
     let exe = "cargo";
-    let args = [
-        "doc",
-    ];
+    let args = ["doc", "--no-deps"];
     let output = Command::new(exe)
         .args(args)
         .current_dir(&crate_path)
         .output()?;
     // TODO check output.status
-    let html_path = crate_path
-        .join("target")
-        .join("doc");
+    let html_path = crate_path.join("target").join("doc");
     Ok(html_path)
 }
 

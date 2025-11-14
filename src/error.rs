@@ -1,4 +1,3 @@
-
 #[derive(thiserror::Error, Debug)]
 pub enum CradError {
     #[error("IO Error: {0}")]
@@ -16,4 +15,3 @@ pub enum CradError {
 }
 
 pub type CradResult<T> = Result<T, CradError>;
-

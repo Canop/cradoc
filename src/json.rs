@@ -1,16 +1,10 @@
 use {
     crate::*,
-    rustdoc_types::{
-        Crate,
-    },
+    rustdoc_types::Crate,
     std::{
         fs,
-        path::{
-            Path,
-        },
-        process::{
-            Command,
-        },
+        path::Path,
+        process::Command,
     },
 };
 
@@ -21,7 +15,14 @@ pub fn build_and_read_json_doc(
 ) -> CradResult<Crate> {
     let exe = "cargo";
     let args = [
-        "+nightly", "rustdoc", "--lib", "--", "-Z", "unstable-options", "--output-format", "json"
+        "+nightly",
+        "rustdoc",
+        "--lib",
+        "--",
+        "-Z",
+        "unstable-options",
+        "--output-format",
+        "json",
     ];
     let output = Command::new(exe)
         .args(args)

@@ -80,15 +80,15 @@ impl Context {
 
         // replace code links like [sometype] or [`sometype`] with proper links
         let docs = regex_replace_all!(
-            r"\[(`?([\w:]+!?)`?)\]($|[^(])",
+            r"(^|[^!])\[(`?([\w:]+!?)`?)\]($|[^(\[])",
             &docs,
-            |_, content, text, after| {
+            |_, before, content, text, after| {
                 if let Some(link) = links.get(text) {
                     let url = format!("{}{}", self.online_doc_base_url, link);
-                    format!("[{content}]({url}){after}")
+                    format!("{before}[{content}]({url}){after}")
                 } else {
                     warn!("no link found for `{text}`");
-                    format!("{content}{after}")
+                    format!("{before}{content}{after}")
                 }
             }
         );

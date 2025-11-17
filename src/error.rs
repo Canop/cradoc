@@ -1,7 +1,7 @@
 #[derive(thiserror::Error, Debug)]
 pub enum CradError {
     #[error("IO Error: {0}")]
-    IO(#[from] std::io::Error),
+    Io(#[from] std::io::Error),
     #[error("JSON Error: {0}")]
     Json(#[from] serde_json::Error),
     #[error("Invalid UTF-8: {0}")]
@@ -12,6 +12,16 @@ pub enum CradError {
     NoCrateItem,
     #[error("No doc in item")]
     NoDocInItem,
+    #[error("Cargo command {args:?} failed with status {status:?}")]
+    CargoCommandFailure {
+        args: &'static[&'static str],
+        status: std::process::ExitStatus,
+    },
+    #[error("Failed to read {path:?}: {error}")]
+    Read {
+        path: std::path::PathBuf,
+        error: std::io::Error,
+    },
 }
 
 pub type CradResult<T> = Result<T, CradError>;

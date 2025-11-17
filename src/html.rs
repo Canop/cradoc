@@ -11,27 +11,24 @@ use {
             Path,
             PathBuf,
         },
-        process::Command,
     },
 };
 
 /// Build the crate documentation in HTML format and return the path to the
 ///  directory holding all docs (one subdir per crate)
 pub fn build_html_doc(crate_path: &Path) -> CradResult<PathBuf> {
-    let exe = "cargo";
-    let args = ["doc", "--no-deps"];
-    let output = Command::new(exe)
-        .args(args)
-        .current_dir(&crate_path)
-        .output()?;
-    // TODO check output.status
+    run_cargo_command(&["doc", "--no-deps"], crate_path)?;
     let html_path = crate_path.join("target").join("doc");
     Ok(html_path)
 }
 
 /// Extract all links from an HTML file and returns them as a map of link text to URL
 pub fn extract_links<P: AsRef<Path>>(path: P) -> CradResult<FxHashMap<String, String>> {
-    let html_content = fs::read_to_string(path)?;
+    let path = path.as_ref();
+    let html_content = fs::read_to_string(path).map_err(|error| CradError::Read {
+        path: path.to_path_buf(),
+        error,
+    })?;
     let document = Html::parse_document(&html_content);
     let selector = Selector::parse("a").unwrap(); // safety: to be checked
     let mut links = FxHashMap::default();

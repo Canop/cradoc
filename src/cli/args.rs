@@ -7,9 +7,10 @@ use {
 };
 
 static INTRO: &str = "
-cradoc does the stuff it's meant to do
+cradoc updates any markdown file with a crate's lib documentation.
 
-(for the 0.2 I'll try to determine what this stuff is and I'll write it down here)
+See https://github.com/Canop/cradoc
+
 ";
 
 /// Launch arguments
